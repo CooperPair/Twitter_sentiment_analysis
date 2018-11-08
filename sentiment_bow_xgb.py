@@ -1,3 +1,4 @@
+# Accuracy of the model = 0.52
 # Importing necessary libraries
 import re
 import pandas as pd

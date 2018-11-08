@@ -1,4 +1,5 @@
 #Twitter preprocessing and cleaning
+
 import re
 import pandas as pd
 import numpy as np
@@ -10,6 +11,7 @@ import warnings
 from nltk.stem.porter import *
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from xgboost.sklearn import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -174,7 +176,7 @@ test_pred_int1 = test_pred_int1.astype(np.int)
 test['label'] = test_pred_int1
 submission = test[['id','label']]
 submission.to_csv('sub.csv', index=False) # writing data to a CSV file
-'''
+
 
 
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -184,3 +186,4 @@ text_clf = Pipeline([('vect', CountVectorizer()),('tfidf', TfidfVectorizer()),('
 text_clf.fit(xtrain_tfidf, ytrain)  
 predicted = text_clf.predict(xvalid_tfidf)
 print(np.mean(predicted == twenty_test.target))
+'''
