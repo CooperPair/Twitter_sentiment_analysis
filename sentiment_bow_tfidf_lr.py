@@ -11,7 +11,7 @@ import warnings
 from nltk.stem.porter import *
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import CountVectorizer
-from xgboost.sklearn import XGBClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 
@@ -35,14 +35,14 @@ def remove_pattern(input_txt, pattern):
 
 	return input_txt
 
-# Creating the new column tidy_tweet
+# Creating the new column tidy_tweet(containing cleaned and processed data)
 combi['tidy_tweet'] = np.vectorize(remove_pattern)(combi['tweet'], "@[\w]*")
 
 # Removing puncuations, Numbers and special characters
 combi['tidy_tweet'] = combi['tidy_tweet'].str.replace("[^a-zA-Z#]", " ")
 
 # Removing short words(like hmm, yaa okay etc etc)
-combi['tidy_tweet'] = combi['tidy_tweet'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>3]))
+combi['tidy_tweet'] = combi['tidy_tweet'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>2]))
 
 # Tokenization = splitting the datasets
 tokenized_tweet = combi['tidy_tweet'].apply(lambda x: x.split())
@@ -64,26 +64,26 @@ wordcloud = WordCloud(width=800, height=500, random_state=21, max_font_size=110)
 plt.figure(figsize=(10, 7))
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis('off')
-#plt.show()
+plt.show()
 
 
-# Words in non racist/sexist tweets
+# What are the words in non racist and non sexist tweets
 
 normal_words = ' '.join([text for text in combi['tidy_tweet'][combi['label']==0]])
 wordcloud = WordCloud(width=800, height=500, random_state=21, max_font_size=110).generate(normal_words)
 plt.figure(figsize=(10, 7))
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis('off')
-#plt.show()
+plt.show()
 
-# Racist and sexist tweets
+#Words in sexist and racist tweets
 
 negative_words = ' '.join([text for text in combi['tidy_tweet'][combi['label'] == 1]])
 wordcloud = WordCloud(width=800, height=500,random_state=21, max_font_size=110).generate(negative_words)
 plt.figure(figsize=(10, 7))
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis('off')
-#plt.show()
+plt.show()
 
 
 # Understanding the impact of hash tags in tweets 
@@ -100,17 +100,17 @@ def hashtag_extract(x):
 	return hashtags
 
 # Extracting hashtags from non racist/sexist tweets
-HT_regular = hashtag_extract(combi['tidy_tweet'][combi['label']==0])
+HT_positive = hashtag_extract(combi['tidy_tweet'][combi['label']==0])
 
 # Extracting hashtags from racist/sexist tweets
 HT_negative = hashtag_extract(combi['tidy_tweet'][combi['label'] == 1])
 
 # Unnesting list
-HT_regular = sum(HT_regular,[])
+HT_positive = sum(HT_positive,[])
 HT_negative = sum(HT_negative, [])
 
-# Non-racist/sexist tweets
-a = nltk.FreqDist(HT_regular)
+# Non-racist/sexist tweets to check the number of hastags
+a = nltk.FreqDist(HT_positive)
 d = pd.DataFrame({'Hashtag': list(a.keys()),'Count': list(a.values())})
 
 # selecting top 10 most frequent hashtags     
@@ -118,10 +118,9 @@ d = d.nlargest(columns="Count", n = 10)
 plt.figure(figsize=(16,5))
 ax = sns.barplot(data=d, x= "Hashtag", y = "Count")
 ax.set(ylabel = 'Count')
-#plt.show()
+plt.show()
 
 # Racist/sexists tweets
-
 b = nltk.FreqDist(HT_negative)
 e = pd.DataFrame({'Hashtag': list(b.keys()), 'Count': list(b.values())})
 # selecting top 10 most frequent hashtags
@@ -129,10 +128,9 @@ e = e.nlargest(columns="Count", n = 10)
 plt.figure(figsize=(16,5))
 ax = sns.barplot(data=e, x= "Hashtag", y = "Count")
 ax.set(ylabel = 'Count')
-#plt.show()
+plt.show()
 
 # Extract features from the tokeize words
-
 bow_vectorizer = CountVectorizer(max_df = 0.90, min_df = 2, max_features= 1000, stop_words = 'english')
 
 # bag-of-words feature matrix 
